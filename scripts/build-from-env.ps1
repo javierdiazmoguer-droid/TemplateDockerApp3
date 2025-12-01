@@ -25,7 +25,7 @@ foreach ($line in $lines) {
     $buildArgs += "$k=$v"
 }
 
-$argsSTR = @('build', '-f', $Dockerfile, '-t', $Tag) + $buildArgs + '.'
+$argsSTR = @('build', '--no-cache','-f', $Dockerfile, '-t', $Tag) + $buildArgs + '.'
 
 Write-Host "Ejecutando: docker $($argsSTR -join ' ')" & docker @argsSTR
 $code = $LASTEXITCODE
