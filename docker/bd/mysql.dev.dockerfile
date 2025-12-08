@@ -23,11 +23,6 @@ RUN apk update && \
     adduser -S ${DB_USER} -G ${DB_USER} && \
     mkdir -p ${DB_DATADIR} /run/mysqld && \
     chown -R ${DB_USER}:${DB_USER} ${DB_DATADIR} /run/mysqld && \
-    echo "[mysqld] \n \
-    datadir=${DB_DATADIR} \n \
-    socket=${DB_DATADIR}/mysql.sock \n \
-    user=${DB_USER} \n \
-    bind-address=0.0.0.0" > /etc/my.cnf && \
     rm -rf /var/cache/apk/* /tmp/* && \
     mariadb-install-db --user=${DB_USER} --datadir=${DB_DATADIR}
 
@@ -39,5 +34,4 @@ EXPOSE ${DB_PORT}
 USER ${DB_USER}
 
 # Entrypoint y comando por defecto
-ENTRYPOINT [ "mariadbd","--datadir=/var/lib/mysql", "--socket=/run/mysqld/mysqld.sock"]
-
+ENTRYPOINT [ "mysqld_safe", "--datadir=/var/lib/mysql"]

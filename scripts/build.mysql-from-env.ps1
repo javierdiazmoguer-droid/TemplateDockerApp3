@@ -23,10 +23,10 @@ $buildArgsSTR = @(
     "--build-arg DB_PORT=" + $envVars['DB_PORT']
 ) -join ' '
 
-$argsSTR = @('build', '--no-cache', '-f', $Dockerfile, '-t', $Tag, $buildArgsSTR, '.') -join ' '
+$cmddockerSTR = @('docker build', '--no-cache', '-f', $Dockerfile, '-t', $Tag, $buildArgsSTR, '.') -join ' '
 
-Write-Host "Ejecutando: docker $argsSTR" 
-docker @argsSTR
+Write-Host "Ejecutando: docker $cmddockerSTR" 
+Invoke-Expression $cmddockerSTR
 $code = $LASTEXITCODE
 if ($code -ne 0) {
     Write-Error "docker build falló con código $code"
