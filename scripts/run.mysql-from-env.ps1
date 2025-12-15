@@ -49,6 +49,7 @@ $dockerCmd = @(
     "--hostname $containerName",
     "--network $networkName",
     "--ip $ip",
+    "--hostentry ${ip} mysqlhost",
     $imageName
 ) -join ' '
 

@@ -17,13 +17,18 @@ Get-Content $envFile | ForEach-Object {
 }
 
 # Configurar variables
-$servername = $envVars['SERVER_NAME'] 
-$containerName = $envVars['CONTAINER_NAME'] 
-$portMapping = $envVars['PORT_MAPPING'] 
-$volumePath = $envVars['VOLUME_PATH']
 $imageName = $envVars['IMAGE_NAME']
-$networkName = $envVars['NETWORK_NAME']
+$containerName = $envVars['CONTAINER_NAME'] 
 $ip = $envVars['SERVER_IP']
+
+$moodleservername = $envVars['MOODLE_SERVER_NAME']
+$servername = $envVars['SERVER_NAME']
+$moodleserverport = $envVars['MOODLE_SERVER_PORT']
+
+$MOODLE_VOLUME_PATH = $envVars['MOODLE_VOLUME_PATH']
+$volumePath = $envVars['VOLUME_PATH']
+
+$networkName = $envVars['NETWORK_NAME']
 
 # Eliminar contenedor si existe
 if (docker ps -a --filter "name=^${containerName}$" --format "{{.Names}}" | Select-Object -First 1) {
@@ -35,16 +40,17 @@ if (docker ps -a --filter "name=^${containerName}$" --format "{{.Names}}" | Sele
 # Ejecutar el contenedor Docker
 $dockerCmd = @(
     "docker run -d",
-    "--name $containerName",
-    "-p $portMapping",
-    "-v .\src:/var/www/localhost/htdocs",
-    "-v ${volumePath}:/var/www/${servername}",
+    "--name ${containerName}",
+    "-p ${moodleserverport}:80",
+    "-v ${volumePath}:/var/www/localhost/htdocs",
+    "-v ${MOODLE_VOLUME_PATH}:/var/www/${moodleservername}",
     "-v .\logs\apachephp:/var/log/apache2",
     "--env-file $envFile",
     "--hostname $containerName",
     "--network $networkName",
     "--ip $ip",
-    "--hostentry ${ip} ${servername}",
+    "--add-host ${servername}:${ip}",
+    "--add-host ${moodleservername}:${ip}",
     $imageName
 ) -join ' '
 
