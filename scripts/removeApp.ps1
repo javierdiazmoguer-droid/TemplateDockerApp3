@@ -1,24 +1,60 @@
-# Obtener la ruta del repositorio actual
-$repoPath = Get-Location
+# Elimina TODOS los submódulos de un repositorio Git
+# Ignacio: este script limpia .gitmodules, .git/config, .git/modules y el working tree
 
-# Obtener la lista de submódulos
-$submodules = git submodule status --recursive | ForEach-Object {
-    $_ -replace '^\s*([+-]?\d+)\s+(\S+)\s+.*$', '$2'
+Write-Host "Detectando submódulos..." -ForegroundColor Cyan
+
+# 1. Obtener lista de submódulos desde .gitmodules
+$gitmodules = ".gitmodules"
+
+if (!(Test-Path $gitmodules)) {
+    Write-Host "No existe .gitmodules. No hay submódulos que eliminar." -ForegroundColor Yellow
+    exit
 }
 
-# Eliminar cada submódulo
-foreach ($submodule in $submodules) {
-    Write-Host "Eliminando submódulo: $submodule"
-    
-    # Eliminar la entrada del submódulo del archivo .gitmodules
-    (Get-Content "$repoPath\.gitmodules") -replace "^\s*\[submodule `"$submodule`"\].*?^\s*\[", "" -replace "^\s*\[submodule `"$submodule`"\].*?(\r?\n)+", "" | Set-Content "$repoPath\.gitmodules"
-    
-    # Eliminar la carpeta del submódulo
-    Remove-Item -Recurse -Force "$repoPath\$submodule"
-    
-    # Eliminar la entrada del submódulo del índice de Git
-    git rm --cached "$submodule"
+# Leer rutas de submódulos
+$submodules = Select-String -Path $gitmodules -Pattern "path = " | ForEach-Object {
+    ($_ -split "path = ")[1].Trim()
 }
 
-# Confirmar los cambios
-git commit -m "Eliminados submódulos"
+if ($submodules.Count -eq 0) {
+    Write-Host "No se encontraron submódulos en .gitmodules." -ForegroundColor Yellow
+    exit
+}
+
+Write-Host "Submódulos detectados:" -ForegroundColor Green
+$submodules | ForEach-Object { Write-Host " - $_" }
+
+# 2. Eliminar cada submódulo
+foreach ($sub in $submodules) {
+
+    Write-Host "`nEliminando submódulo: $sub" -ForegroundColor Cyan
+
+    # Deinit
+    git submodule deinit -f $sub | Out-Null
+
+    # Eliminar del índice
+    git rm -f $sub | Out-Null
+
+    # Eliminar carpeta física
+    if (Test-Path $sub) {
+        Remove-Item -Recurse -Force $sub
+        Write-Host "Carpeta eliminada: $sub"
+    }
+
+    # Eliminar carpeta interna en .git/modules
+    $modulePath = ".git/modules/$sub"
+    if (Test-Path $modulePath) {
+        Remove-Item -Recurse -Force $modulePath
+        Write-Host "Carpeta interna eliminada: $modulePath"
+    }
+}
+
+# 3. Eliminar archivo .gitmodules
+Remove-Item -Force ".gitmodules"
+Write-Host "`nArchivo .gitmodules eliminado." -ForegroundColor Green
+
+# 4. Commit final
+git add -A
+git commit -m "Remove all submodules" | Out-Null
+
+Write-Host "`n✅ Todos los submódulos han sido eliminados completamente." -ForegroundColor Green
