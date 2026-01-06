@@ -1,3 +1,13 @@
 logs/
+# Ignora la carpeta 'logs/' y todo su contenido
+# Evita subir archivos de log del servidor Apache, PHP u otros servicios al repositorio
+
 mysql_data/
+# Ignora la carpeta 'mysql_data/' y todo su contenido
+# Contiene los datos persistentes de la base de datos MySQL/MariaDB
+# Evita subir bases de datos completas al repositorio, que pueden ser grandes y sensibles
+
 data_moodle/
+# Ignora la carpeta 'data_moodle/' y todo su contenido
+# Contiene datos específicos de Moodle (archivos de usuario, cursos, etc.)
+# Protege información sensible y reduce el tamaño del repositorio
