@@ -1,29 +1,33 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-       
+    // Indica que se puede usar IntelliSense del editor para conocer atributos disponibles
+    // Explica que al situar el cursor sobre un atributo se muestran descripciones
+    // Proporciona una referencia con más información oficial de VSCode Debug
+    "version": "0.2.0", // Define la versión del esquema de depuración que usa VSCode; 0.2.0 es el formato actual estándar
+
+    "configurations": [ // Array principal donde se declaran las distintas configuraciones de lanzamiento del depurador
+
         {
-            "name": "Launch app",
-            "request": "launch",
-            "type": "msedge",
-            "url": "http://apache.localhost",
-            "webRoot": "${workspaceFolder}/src"
+            "name": "Launch app", // Nombre identificativo que verá el alumno en el menú de Debug de VSCode
+            "request": "launch", // Especifica que esta configuración va a iniciar una nueva instancia del navegador
+            "type": "msedge", // Define que el depurador utilizará Microsoft Edge como motor para ejecutar la app
+            "url": "http://apache.localhost", // URL contra la que se conectará el navegador; corresponde al servicio Apache del Docker
+            "webRoot": "${workspaceFolder}/src" // Ruta raíz del proyecto web dentro del workspace para mapear correctamente los breakpoints
         },
+
         {
-            "name": "Launch php-info",
-            "request": "launch",
-            "type": "msedge",
-            "url": "http://apachephp.localhost/php-info",
-            "webRoot": "${workspaceFolder}/phpinfo"
+            "name": "Launch php-info", // Segundo nombre identificativo para lanzar el visor de php-info
+            "request": "launch", // De nuevo se solicita iniciar un nuevo proceso de navegador independiente
+            "type": "msedge", // También se usará Microsoft Edge para visualizar este endpoint PHP
+            "url": "http://apachephp.localhost/php-info", // URL del contenedor que sirve php-info, distinto virtual host Docker
+            "webRoot": "${workspaceFolder}/phpinfo" // Carpeta local que contiene el script phpinfo para que VSCode relacione código↔contenedor
         }
     ],
-    "compounds": [
+
+    "compounds": [ // Sección que permite combinar varias configuraciones para ejecutarlas simultáneamente
+
         {
-            "name": "Launch all",
-            "configurations": ["Launch app", "Launch php-info"]
+            "name": "Launch all", // Nombre del grupo compuesto que aparecerá en el depurador
+            "configurations": ["Launch app", "Launch php-info"] // Lista de configuraciones definidas arriba que se lanzarán a la vez
         }
     ]
 }
