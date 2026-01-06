@@ -1,72 +1,100 @@
-[mysqld]
+[mysqld] # Inicia la sección de configuración del demonio del servidor MySQL
+
 # MySQL Server Configuration for Moodle
+# Describe de forma general el propósito del archivo: ajustes orientados a un servidor MySQL usado por Moodle
 
 # Database Settings
-default-storage-engine=InnoDB
-character-set-server=utf8mb4
-collation-server=utf8mb4_unicode_ci
-skip-character-set-client-handshake
+# Introduce el bloque dedicado a parámetros internos de base de datos y codificación
+
+default-storage-engine=InnoDB # Establece InnoDB como motor por defecto para todas las tablas nuevas
+character-set-server=utf8mb4 # Define que el servidor almacenará texto en UTF-8 completo con soporte de emojis y caracteres extendidos
+collation-server=utf8mb4_unicode_ci # Fija la regla de ordenación y comparación de cadenas en modo Unicode insensible a mayúsculas
+skip-character-set-client-handshake # Obliga a usar el charset del servidor ignorando el que solicite el cliente
 
 # Connection Settings
-max_connections=200
-max_allowed_packet=64M
-connect_timeout=10
-wait_timeout=28800
-max_connect_errors=100
+# Presenta parámetros que gobiernan la gestión de conexiones TCP desde contenedores o aplicaciones
+
+max_connections=200 # Limita a 200 las conexiones simultáneas permitidas al proceso mysqld
+max_allowed_packet=64M # Tamaño máximo de paquete/comando que puede recibir el servidor
+connect_timeout=10 # Tiempo máximo en segundos para completar el establecimiento de conexión
+wait_timeout=28800 # Tiempo de inactividad antes de cerrar conexiones persistentes (8 horas)
+max_connect_errors=100 # Número de errores seguidos desde un host antes de bloquearlo
 
 # Table Cache
-table_open_cache=4000
-table_definition_cache=2000
+# Encabezado para ajustes de caché de descriptores de tablas en memoria del contenedor
+
+table_open_cache=4000 # Cantidad de tablas que pueden mantenerse abiertas en caché
+table_definition_cache=2000 # Número de definiciones de tablas almacenadas para acelerar accesos
 
 # Query Optimization
-query_cache_type=0
-query_cache_size=0
+# Introduce opciones relacionadas con optimización de consultas SQL
+
+query_cache_type=0 # Desactiva completamente el query cache antiguo
+query_cache_size=0 # Asigna tamaño cero a dicha caché para evitar consumo de RAM
 
 # InnoDB Settings (recommended for Moodle)
-innodb_buffer_pool_size=1G
-innodb_log_file_size=256M
-innodb_file_per_table=1
-innodb_flush_log_at_trx_commit=2
-innodb_flush_method=O_DIRECT
-innodb_lock_wait_timeout=50
+# Encabezado que agrupa parámetros InnoDB aconsejados para cargas web educativas
+
+innodb_buffer_pool_size=1G # Reserva 1GB de RAM del contenedor para caché de datos e índices InnoDB
+innodb_log_file_size=256M # Define archivos de log transaccional de 256MB
+innodb_file_per_table=1 # Guarda cada tabla en fichero independiente dentro del volumen Docker
+innodb_flush_log_at_trx_commit=2 # Reduce escrituras en disco sacrificando algo de seguridad por rendimiento
+innodb_flush_method=O_DIRECT # Utiliza acceso directo a disco evitando doble caché del sistema
+innodb_lock_wait_timeout=50 # Tiempo máximo de espera por bloqueos de fila
 
 # Performance Schema
-performance_schema=ON
-performance_schema_max_table_instances=12500
+# Encabezado para la configuración del subsistema de métricas
+
+performance_schema=ON # Activa performance schema para análisis de rendimiento
+performance_schema_max_table_instances=12500 # Número máximo de instancias de tabla monitorizadas
 
 # Logging
-log_error=/var/log/mysql/error.log
-slow_query_log=1
-slow_query_log_file=/var/log/mysql/slow.log
-long_query_time=2
+# Introduce parámetros de registro dentro del filesystem del contenedor
+
+log_error=/var/log/mysql/error.log # Ruta donde MySQL escribirá errores del servicio Docker
+slow_query_log=1 # Activa el registro de consultas lentas
+slow_query_log_file=/var/log/mysql/slow.log # Fichero destino para dichas consultas
+long_query_time=2 # Considera lenta toda consulta superior a 2 segundos
 
 # Binlog (for replication/backup)
-log_bin=/var/log/mysql/mysql-bin.log
-binlog_format=ROW
-server_id=1
-expire_logs_days=10
+# Encabezado de ajustes para binlog útil en réplicas o backups
+
+log_bin=/var/log/mysql/mysql-bin.log # Activa binlog y define su ubicación en el contenedor
+binlog_format=ROW # Formato de binlog por filas, adecuado para replicación fiable
+server_id=1 # Identificador único del servidor en escenarios multi contenedor
+expire_logs_days=10 # Días tras los que se purgan binlogs
+# (for replication/backup) comentario explicativo previo ya cubre el contexto
+server_id=1 # — línea repetida en contenido original; se vuelve a fijar el id del servidor
+expire_logs_days=10 # Indica nuevamente política de expiración de logs binarios
 
 # Thread Settings
-thread_stack=192K
-thread_cache_size=16
+# Encabezado para configuración de hilos del proceso
+
+thread_stack=192K # Tamaño de pila asignado a cada hilo de conexión
+thread_cache_size=16 # Número de hilos que se mantienen en caché
 
 # Moodle Specific Optimizations
-tmp_table_size=32M
-max_heap_table_size=32M
-sort_buffer_size=2M
-read_buffer_size=2M
-read_rnd_buffer_size=8M
-join_buffer_size=2M
+# Encabezado para parámetros orientados a apps PHP tipo Moodle
 
-[mysqldump]
-quick
-quote-names
-max_allowed_packet=64M
-default-character-set=utf8mb4
+tmp_table_size=32M # Tamaño máximo de tablas temporales en memoria
+max_heap_table_size=32M # Límite de tablas HEAP en RAM
+sort_buffer_size=2M # Memoria para operaciones ORDER BY
+read_buffer_size=2M # Buffer para lecturas secuenciales
+read_rnd_buffer_size=8M # Buffer para lecturas aleatorias tras ordenación
+join_buffer_size=2M # Memoria usada en joins sin índices
 
-[mysql]
-default-character-set=utf8mb4
+[mysqldump] # Inicia la sección específica del cliente de volcado de MySQL
 
-[client]
-default-character-set=utf8mb4
-port=3306
+quick # Permite volcado fila a fila sin cargar todo en RAM
+quote-names # Fuerza entrecomillar nombres de tablas y columnas
+max_allowed_packet=64M # Tamaño de paquete también para mysqldump
+default-character-set=utf8mb4 # Charset por defecto en los volcados
+
+[mysql] # Sección del cliente interactivo mysql
+
+default-character-set=utf8mb4 # Codificación usada al conectarse desde la aplicación Docker
+
+[client] # Sección global de cliente MySQL
+
+default-character-set=utf8mb4 # Charset que usarán librerías cliente
+port=3306 # Puerto TCP en el que el contenedor MySQL aceptará conexiones
