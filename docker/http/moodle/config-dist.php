@@ -27,9 +27,9 @@
 //          http://www.gnu.org/copyleft/gpl.html                         //
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
-unset($CFG);  // Ignore this line
-global $CFG;  // This is necessary here for PHPUnit execution
-$CFG = new stdClass();
+unset($CFG);  // Ignore this line // Limpia cualquier instancia previa de la variable global de configuración.
+global $CFG;  // This is necessary here for PHPUnit execution // Declara $CFG como global para que sea accesible en todo el flujo de Moodle.
+$CFG = new stdClass(); // Inicializa el objeto de configuración como una clase estándar vacía.
 
 //=========================================================================
 // 1. DATABASE SETUP
@@ -38,32 +38,32 @@ $CFG = new stdClass();
 // will be stored.  This database must already have been created         //
 // and a username/password created to access it.                         //
 
-$CFG->dbtype    = 'mariadb';                  // 'pgsql', 'mariadb', 'mysqli', 'auroramysql', or 'sqlsrv'
-$CFG->dblibrary = 'native';                 // 'native' only at the moment
-$CFG->dbhost    = 'localhost';              // eg 'localhost' or 'db.isp.com' or IP
-$CFG->dbname    = 'moodle';                 // database name, eg moodle
-$CFG->dbuser    = 'username';               // your database username
-$CFG->dbpass    = 'password';               // your database password
-$CFG->prefix    = 'mdl_';                   // prefix to use for all table names
+$CFG->dbtype    = 'mariadb';                  // 'pgsql', 'mariadb', 'mysqli', 'auroramysql', or 'sqlsrv' // Define el motor de BD. 'mariadb' es el estándar para entornos Docker modernos.
+$CFG->dblibrary = 'native';                 // 'native' only at the moment // Utiliza la librería nativa de PHP (mysqli/pgsql) para mejorar el rendimiento.
+$CFG->dbhost    = 'localhost';              // eg 'localhost' or 'db.isp.com' or IP // Dirección del servidor de BD. En Docker, suele ser el nombre del servicio (ej. 'db').
+$CFG->dbname    = 'moodle';                 // database name, eg moodle // Nombre de la base de datos específica para esta instancia de Moodle.
+$CFG->dbuser    = 'username';               // your database username // Usuario con privilegios de lectura/escritura en la base de datos mencionada.
+$CFG->dbpass    = 'password';               // your database password // Contraseña de acceso; debe mantenerse cifrada y segura en entornos reales.
+$CFG->prefix    = 'mdl_';                   // prefix to use for all table names // Prefijo para las tablas; permite compartir BD si fuera estrictamente necesario.
 $CFG->dboptions = [
-    'dbpersist' => false,                   // Should persistent database connections be
+    'dbpersist' => false,                   // Desactiva conexiones persistentes para evitar saturar el pool de hilos de MariaDB. // Should persistent database connections be
                                             //   used? Set to 'false' for the most stable
                                             //   setting, 'true' can improve performance
                                             //   sometimes
-    'dbsocket'  => false,                   // Should connection via UNIX socket be used?
+    'dbsocket'  => false,                   // Indica si se usa socket Unix; en 'false' fuerza el uso de red TCP/IP. // Should connection via UNIX socket be used?
                                             //   if you set it to 'true' or custom path
                                             //   here set dbhost to 'localhost',
                                             //   (please note mysql is always using socket
                                             //   if dbhost is 'localhost' - if you need
                                             //   local port connection use '127.0.0.1')
-    'dbport'    => '',                      // The TCP port number to use when connecting
+    'dbport'    => '',                      // Puerto TCP (3306 por defecto). Se deja vacío para usar el estándar del driver. // The TCP port number to use when connecting
                                             //   to the server. Keep empty string for the
                                             //   default port
-    'dbhandlesoptions' => false,            // On PostgreSQL poolers like pgbouncer don't
+    'dbhandlesoptions' => false,            // Deshabilita opciones avanzadas de conexión para evitar fallos en balanceadores de carga. // On PostgreSQL poolers like pgbouncer don't
                                             //   support advanced options on connection.
                                             //   If you set those in the database then
                                             //   the advanced settings will not be sent.
-    'dbcollation' => 'utf8mb4_unicode_ci',  // MySQL has partial and full UTF-8
+    'dbcollation' => 'utf8mb4_unicode_ci',  // Soporte completo de UTF-8 (emojis y caracteres complejos) requerido por Moodle. // MySQL has partial and full UTF-8
                                             //   support. If you wish to use partial UTF-8
                                             //   (three bytes) then set this option to
                                             //   'utf8_unicode_ci'. If using the recommended
@@ -173,7 +173,7 @@ $CFG->dboptions = [
 // If you need both intranet and Internet access please read
 // http://docs.moodle.org/en/masquerading
 
-$CFG->wwwroot   = 'http://moodle.asir/';
+$CFG->wwwroot   = 'http://moodle.asir/'; // URL base del sitio. Moodle no admite acceso por múltiples URLs de forma nativa.
 
 //=========================================================================
 // 3. DATA FILES LOCATION
@@ -188,7 +188,7 @@ $CFG->wwwroot   = 'http://moodle.asir/';
 //
 // - On Windows systems you might specify something like 'c:\moodledata'
 
-$CFG->dataroot  = '/var/moodledata';
+$CFG->dataroot  = '/var/moodledata'; // Ruta interna donde Moodle guarda archivos subidos, sesiones y caché; fuera del webroot por seguridad.
 
 // Whether the Moodle router is fully configured.
 //
@@ -197,7 +197,7 @@ $CFG->dataroot  = '/var/moodledata';
 //
 // When not configured on the web server it must be accessed via https://example.com/moodle/r.php
 // When configured the on the web server the 'r.php' may be removed.
-$CFG->routerconfigured = false;
+$CFG->routerconfigured = false; // Indica si el servidor web tiene reglas de reescritura para URLs cortas de Moodle.
 
 //=========================================================================
 // 4. DATA FILES PERMISSIONS
@@ -210,7 +210,7 @@ $CFG->routerconfigured = false;
 // to make sure the web server process (eg Apache) can access the files.
 // NOTE: the prefixed 0 is important, and don't use quotes.
 
-$CFG->directorypermissions = 02777;
+$CFG->directorypermissions = 02777; // Define permisos para directorios nuevos; 02777 asegura compatibilidad en volúmenes Docker.
 
 
 //=========================================================================
@@ -227,7 +227,7 @@ $CFG->directorypermissions = 02777;
 // After any change you need to visit your new admin directory
 // and purge all caches.
 
-$CFG->admin = 'admin';
+$CFG->admin = 'admin'; // Nombre de la carpeta de administración. Se mantiene 'admin' por estándar de la plataforma.
 
 
 //=========================================================================
